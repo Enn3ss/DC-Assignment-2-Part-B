@@ -22,8 +22,10 @@
         <TextBlock Name="ClientIdTextBlock" HorizontalAlignment="Left" Margin="379,16,0,0" TextWrapping="Wrap" Text="Client ID: " VerticalAlignment="Top" RenderTransformOrigin="0.821,0.366"/>
         <TextBlock Name="IpAddressTextBlock" HorizontalAlignment="Left" Margin="379,37,0,0" TextWrapping="Wrap" Text="IP Address: " VerticalAlignment="Top"/>
         <TextBlock Name="PortTextBlock" HorizontalAlignment="Left" Margin="379,58,0,0" TextWrapping="Wrap" Text="Port: " VerticalAlignment="Top"/>
+        <TextBlock Name="JobsCompletedTextBlock" HorizontalAlignment="Left" Margin="379,79,0,0" TextWrapping="Wrap" Text="Completed Jobs: " VerticalAlignment="Top"/>
+        <TextBlock Name="ResultTextBlock" HorizontalAlignment="Left" Margin="379,100,0,0" TextWrapping="Wrap" Text="Result of Last Completed Job: " VerticalAlignment="Top"/>
         <TextBox Name="PythonCodeTextBox" HorizontalAlignment="Left" Margin="566,10,0,0" TextWrapping="Wrap" Text="Python Code" VerticalAlignment="Top" Width="166" Height="58"/>
-        <Button Name="EnterButton" Content="Enter" HorizontalAlignment="Left" Margin="750,29,0,0" VerticalAlignment="Top"/>
+        <Button Name="EnterButton" Content="Enter" HorizontalAlignment="Left" Margin="750,29,0,0" VerticalAlignment="Top" Click="EnterButton_Click"/>
         <TextBlock HorizontalAlignment="Left" Margin="374,133,0,0" TextWrapping="Wrap" Text="List of Available Jobs: " VerticalAlignment="Top"/>
         <ListBox Name="JobListBox" Margin="374,154,19,20"/>
     </Grid>

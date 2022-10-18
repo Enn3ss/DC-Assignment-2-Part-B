@@ -3,20 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Net;
 using System.ServiceModel;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Windows.Threading;
 using Newtonsoft.Json;
 using RestSharp;
 using WebServer.Models;
@@ -32,6 +23,7 @@ namespace ClientDesktopApp
         readonly int clientId;
         readonly string ipAddress = "127.0.0.1";
         readonly string port;
+        int completedJobs = 0;
         readonly string localHost = "http://localhost:52998/";
 
         public MainWindow()
@@ -60,6 +52,7 @@ namespace ClientDesktopApp
             ClientIdTextBlock.Text = "Client ID: " + clientId.ToString();
             IpAddressTextBlock.Text = "IP Address: " + ipAddress;
             PortTextBlock.Text = "Port: " + port;
+            JobsCompletedTextBlock.Text = "Completed Jobs: " + completedJobs.ToString();
         }
 
         private void NetworkingThreadTask()
@@ -71,11 +64,52 @@ namespace ClientDesktopApp
             foobFactory = new ChannelFactory<JobServerInterface>(tcp, URL);
             jobServer = foobFactory.CreateChannel();
 
-            while(true)
-            { }
+            
+            while (true)
+            {
+                Thread.Sleep(2000);
+                List<Job> jobs = jobServer.GetJobs();
+                this.UpdateAvailableJobs(jobs);
+            
+                if (jobs != null) // Check if job list is null
+                {
+                    var rnd = new Random();
+                    var randomized = jobs.OrderBy(item => rnd.Next()); // Shuffling list of jobs in random order
 
-            /*
-            Dispatcher.BeginInvoke(new Action(() =>
+                    foreach (var job in randomized)
+                    {
+                        if (job.ClientId != clientId)
+                        {
+                            // Completing the job and getting result
+                            string result = jobServer.CompleteJob(job.PythonCode);
+                            // Updating the job and client
+                            completedJobs++;
+                            Client updatedClient = new Client
+                            {
+                                Id = clientId,
+                                IPAddress = ipAddress,
+                                Port = port,
+                                JobsFinished = completedJobs
+                            };
+                            jobServer.UpdateJob(job, updatedClient);
+                            // Update GUI
+                            this.UpdateResult(result);
+                            this.UpdateJobsCompleted();
+
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    // Error
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            
+            /*Dispatcher.BeginInvoke(new Action(() =>
             {
                 while (true)
                 {
@@ -83,14 +117,14 @@ namespace ClientDesktopApp
                     // check each client for jobs
 
                     List<Job> jobs = jobServer.GetJobs();
-                    jobList = new List<string>();
+                    //jobList = new List<string>();
 
                     foreach (Job job in jobs)
                     {
                         if (job.ClientId != clientId)
                         {
-                            jobList.Add(job.PythonCode.ToString());
-                            JobList.Items.Add("Test");
+                            //jobList.Add(job.PythonCode.ToString());
+                            JobListBox.Items.Add("Test");
                         }
                     }
 
@@ -130,7 +164,7 @@ namespace ClientDesktopApp
                 Id = clientId,
                 IPAddress = ipAddress,
                 Port = port,
-                JobsFinished = 0
+                JobsFinished = completedJobs
             };
 
             RestClient client = new RestClient(localHost);
@@ -150,6 +184,65 @@ namespace ClientDesktopApp
                 dc.ConsoleInput = "Error: " + response.Content;
                 dc.RunCommand();
             }
+        }
+        private void EnterButton_Click(object sender, RoutedEventArgs e)
+        {
+            Job newJob = new Job
+            {
+                Id = new Random().Next(),
+                ClientId = clientId,
+                PythonCode = PythonCodeTextBox.Text
+            };
+
+            RestClient client = new RestClient(localHost);
+            RestRequest request = new RestRequest("api/Jobs", Method.Post);
+            request.AddJsonBody(JsonConvert.SerializeObject(newJob));
+            RestResponse response = client.Execute(request);
+
+            Job returnJob = JsonConvert.DeserializeObject<Job>(response.Content);
+
+            if (returnJob != null)
+            {
+                dc.ConsoleInput = "Job successfully added to the web server!";
+                dc.RunCommand();
+            }
+            else
+            {
+                dc.ConsoleInput = "Error: " + response.Content;
+                dc.RunCommand();
+            }
+        }
+
+        private void UpdateAvailableJobs(List<Job> jobs)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                JobListBox.Items.Clear();
+
+                foreach (Job job in jobs)
+                {
+                    if (job.ClientId != clientId)
+                    {
+                        JobListBox.Items.Add(job.PythonCode);
+                    }
+                }
+            });
+        }
+
+        private void UpdateResult(string result)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ResultTextBlock.Text = "Result of Last Completed Job: " + result;
+            });
+        }
+
+        private void UpdateJobsCompleted()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                JobsCompletedTextBlock.Text = "Completed Jobs: " + completedJobs.ToString();
+            });
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)

@@ -15,9 +15,9 @@ namespace ClientDesktopApp
         List<Job> GetJobs();
 
         [OperationContract]
-        Job DownloadJob();
+        string CompleteJob(string pythonCode);
 
         [OperationContract]
-        void UploadJobSolution(string solution);
+        void UpdateJob(Job completedJob, Client updatedClient);
     }
 }
