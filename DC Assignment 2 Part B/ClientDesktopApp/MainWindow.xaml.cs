@@ -16,7 +16,7 @@ namespace ClientDesktopApp
 {
     public partial class MainWindow : Window
     {
-        ConsoleContent dc = new ConsoleContent();
+        readonly ConsoleContent dc = new ConsoleContent();
         readonly Thread networkingThread;
         readonly Thread serverThread;
         private JobServerInterface jobServer;
@@ -119,16 +119,11 @@ namespace ClientDesktopApp
 
             host = new ServiceHost(typeof(JobServer));
             host.AddServiceEndpoint(typeof(JobServerInterface), tcp, connection);
-            host.Open();
+            host.Open(); // Open the host but never explicitly close; implicitly close upon Client GUI close
             dc.ConsoleInput = "System Online!";
             dc.RunCommand();
 
-            while (true)
-            {
-
-            }
-
-            //host.Close();
+            while (true) { }
         }
         
         private void RegisterClient()
