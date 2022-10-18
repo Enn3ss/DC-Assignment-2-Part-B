@@ -17,6 +17,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Newtonsoft.Json;
+using RestSharp;
 using WebServer.Models;
 
 namespace ClientDesktopApp
@@ -31,11 +33,33 @@ namespace ClientDesktopApp
         readonly string ipAddress = "127.0.0.1";
         readonly string port;
         readonly string localHost = "http://localhost:52998/";
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = dc;
             Loaded += MainWindow_Loaded;
+
+            // Generating random client ID + port number
+            Random rnd = new Random();
+            clientId = rnd.Next();
+            port = rnd.Next(8100, 65536).ToString();
+
+            // Starting server thread
+            serverThread = new Thread(new ThreadStart(this.ServerThreadTask));
+            serverThread.IsBackground = true;
+            serverThread.Start();
+
+            // Starting networking thread
+            networkingThread = new Thread(new ThreadStart(this.NetworkingThreadTask));
+            networkingThread.IsBackground = true;
+            networkingThread.Start();
+
+            // Adding current client to database
+            RegisterClient();
+            ClientIdTextBlock.Text = "Client ID: " + clientId.ToString();
+            IpAddressTextBlock.Text = "IP Address: " + ipAddress;
+            PortTextBlock.Text = "Port: " + port;
         }
 
         private void NetworkingThreadTask()
@@ -97,6 +121,35 @@ namespace ClientDesktopApp
             }
 
             //host.Close();
+        }
+        
+        private void RegisterClient()
+        {
+            Client thisClient = new Client
+            {
+                Id = clientId,
+                IPAddress = ipAddress,
+                Port = port,
+                JobsFinished = 0
+            };
+
+            RestClient client = new RestClient(localHost);
+            RestRequest request = new RestRequest("api/Clients", Method.Post);
+            request.AddJsonBody(JsonConvert.SerializeObject(thisClient));
+            RestResponse response = client.Execute(request);
+
+            Client returnClient = JsonConvert.DeserializeObject<Client>(response.Content);
+
+            if (returnClient != null)
+            {
+                dc.ConsoleInput = "Client successfully added to the web server!";
+                dc.RunCommand();
+            }
+            else
+            {
+                dc.ConsoleInput = "Error: " + response.Content;
+                dc.RunCommand();
+            }
         }
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)

@@ -11,7 +11,7 @@ using WebServer.Models;
 namespace ClientDesktopApp
 {
     [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
-    internal class JobServer
+    internal class JobServer : JobServerInterface
     {
         readonly string localHost = "http://localhost:52998/";
 
