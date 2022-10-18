@@ -67,7 +67,6 @@ namespace ClientDesktopApp
             
             while (true)
             {
-                Thread.Sleep(2000);
                 List<Job> jobs = jobServer.GetJobs();
                 this.UpdateAvailableJobs(jobs);
             
@@ -80,6 +79,7 @@ namespace ClientDesktopApp
                     {
                         if (job.ClientId != clientId)
                         {
+                            Thread.Sleep(5000);
                             // Completing the job and getting result
                             string result = jobServer.CompleteJob(job.PythonCode);
                             // Updating the job and client
@@ -107,32 +107,6 @@ namespace ClientDesktopApp
 
                 Thread.Sleep(1000);
             }
-
-            
-            /*Dispatcher.BeginInvoke(new Action(() =>
-            {
-                while (true)
-                {
-                    // look for new clients
-                    // check each client for jobs
-
-                    List<Job> jobs = jobServer.GetJobs();
-                    //jobList = new List<string>();
-
-                    foreach (Job job in jobs)
-                    {
-                        if (job.ClientId != clientId)
-                        {
-                            //jobList.Add(job.PythonCode.ToString());
-                            JobListBox.Items.Add("Test");
-                        }
-                    }
-
-                    //JobList.ItemsSource = jobList;
-
-                    Thread.Sleep(1000);
-                }
-            }));*/
         }
 
         private void ServerThreadTask()
