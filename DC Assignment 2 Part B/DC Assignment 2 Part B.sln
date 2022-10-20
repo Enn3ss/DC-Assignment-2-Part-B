@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebServer", "WebServer\WebS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientDesktopApp", "ClientDesktopApp\ClientDesktopApp.csproj", "{C58AEE2E-A3B2-479B-A97D-BB2D558AB4B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "ClassLibrary\ClassLibrary.csproj", "{8B6D42C7-79ED-4D0E-855D-A9FB3BB822DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{C58AEE2E-A3B2-479B-A97D-BB2D558AB4B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C58AEE2E-A3B2-479B-A97D-BB2D558AB4B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C58AEE2E-A3B2-479B-A97D-BB2D558AB4B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B6D42C7-79ED-4D0E-855D-A9FB3BB822DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B6D42C7-79ED-4D0E-855D-A9FB3BB822DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B6D42C7-79ED-4D0E-855D-A9FB3BB822DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B6D42C7-79ED-4D0E-855D-A9FB3BB822DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

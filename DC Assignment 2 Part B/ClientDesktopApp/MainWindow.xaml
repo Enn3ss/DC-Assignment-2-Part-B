@@ -28,5 +28,6 @@
         <Button Name="EnterButton" Content="Enter" HorizontalAlignment="Left" Margin="750,29,0,0" VerticalAlignment="Top" Click="EnterButton_Click"/>
         <TextBlock HorizontalAlignment="Left" Margin="374,133,0,0" TextWrapping="Wrap" Text="List of Available Jobs: " VerticalAlignment="Top"/>
         <ListBox Name="JobListBox" Margin="374,154,19,20"/>
+        <ProgressBar Name="ProgressBar" Visibility="Hidden" IsIndeterminate="True" HorizontalAlignment="Left" Height="10" Margin="666,131,0,0" VerticalAlignment="Top" Width="100"/>
     </Grid>
 </Window>

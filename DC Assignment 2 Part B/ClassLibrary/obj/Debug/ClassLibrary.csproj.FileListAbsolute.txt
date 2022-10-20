@@ -1,0 +1,6 @@
+C:\Users\Nathan Sutandi\Documents\GitHub\DC-Assignment-2-Part-B\DC Assignment 2 Part B\ClassLibrary\bin\Debug\ClassLibrary.dll
+C:\Users\Nathan Sutandi\Documents\GitHub\DC-Assignment-2-Part-B\DC Assignment 2 Part B\ClassLibrary\bin\Debug\ClassLibrary.pdb
+C:\Users\Nathan Sutandi\Documents\GitHub\DC-Assignment-2-Part-B\DC Assignment 2 Part B\ClassLibrary\obj\Debug\ClassLibrary.csproj.AssemblyReference.cache
+C:\Users\Nathan Sutandi\Documents\GitHub\DC-Assignment-2-Part-B\DC Assignment 2 Part B\ClassLibrary\obj\Debug\ClassLibrary.csproj.CoreCompileInputs.cache
+C:\Users\Nathan Sutandi\Documents\GitHub\DC-Assignment-2-Part-B\DC Assignment 2 Part B\ClassLibrary\obj\Debug\ClassLibrary.dll
+C:\Users\Nathan Sutandi\Documents\GitHub\DC-Assignment-2-Part-B\DC Assignment 2 Part B\ClassLibrary\obj\Debug\ClassLibrary.pdb

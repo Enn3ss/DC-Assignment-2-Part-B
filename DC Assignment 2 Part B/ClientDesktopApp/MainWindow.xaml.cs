@@ -8,9 +8,11 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using ClassLibrary;
 using Newtonsoft.Json;
 using RestSharp;
 using WebServer.Models;
+using static IronPython.Modules._ast;
 
 namespace ClientDesktopApp
 {
@@ -30,7 +32,7 @@ namespace ClientDesktopApp
         {
             InitializeComponent();
             DataContext = dc;
-            Loaded += MainWindow_Loaded;
+            Loaded += MainWindow_Loaded; 
 
             // Generating random client ID + port number
             Random rnd = new Random();
@@ -67,45 +69,48 @@ namespace ClientDesktopApp
             
             while (true)
             {
-                List<Job> jobs = jobServer.GetJobs();
-                this.UpdateAvailableJobs(jobs);
-            
-                if (jobs != null) // Check if job list is null
+                Thread.Sleep(new Random().Next(1000, 7000));
+
+                if (JobLock.isLocked == false) // Preventing race condition
                 {
-                    var rnd = new Random();
-                    var randomized = jobs.OrderBy(item => rnd.Next()); // Shuffling list of jobs in random order
+                    List<Job> jobs = jobServer.GetJobs();
+                    this.UpdateAvailableJobs(jobs);
 
-                    foreach (var job in randomized)
+                    if (jobs != null) // Check if job list is null
                     {
-                        if (job.ClientId != clientId)
-                        {
-                            Thread.Sleep(5000);
-                            // Completing the job and getting result
-                            string result = jobServer.CompleteJob(job.PythonCode);
-                            // Updating the job and client
-                            completedJobs++;
-                            Client updatedClient = new Client
-                            {
-                                Id = clientId,
-                                IPAddress = ipAddress,
-                                Port = port,
-                                JobsFinished = completedJobs
-                            };
-                            jobServer.UpdateJob(job, updatedClient);
-                            // Update GUI
-                            this.UpdateResult(result);
-                            this.UpdateJobsCompleted();
+                        var rnd = new Random();
+                        var randomized = jobs.OrderBy(item => rnd.Next()); // Shuffling list of jobs in random order
 
-                            break;
+                        foreach (var job in randomized)
+                        {
+                            if (job.ClientId != clientId)
+                            {
+                                this.SetProgressBarVisible();
+                                JobLock.isLocked = true;
+                                // Completing the job and getting result
+                                string result = jobServer.CompleteJob(job.PythonCode);
+                                // Updating the job and client
+                                completedJobs++;
+                                Client updatedClient = new Client
+                                {
+                                    Id = clientId,
+                                    IPAddress = ipAddress,
+                                    Port = port,
+                                    JobsFinished = completedJobs
+                                };
+                                jobServer.UpdateJob(job, updatedClient);
+                                // Update GUI
+                                this.UpdateResult(result);
+                                this.UpdateJobsCompleted();
+                                JobLock.isLocked = false;
+                                Thread.Sleep(2000);
+                                this.SetProgressBarHidden();
+
+                                break;
+                            }
                         }
                     }
                 }
-                else
-                {
-                    // Error
-                }
-
-                Thread.Sleep(1000);
             }
         }
 
@@ -211,6 +216,22 @@ namespace ClientDesktopApp
             Dispatcher.Invoke(() =>
             {
                 JobsCompletedTextBlock.Text = "Completed Jobs: " + completedJobs.ToString();
+            });
+        }
+
+        private void SetProgressBarVisible()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ProgressBar.Visibility = Visibility.Visible;
+            });          
+        }
+
+        private void SetProgressBarHidden()
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ProgressBar.Visibility = Visibility.Hidden;
             });
         }
 
