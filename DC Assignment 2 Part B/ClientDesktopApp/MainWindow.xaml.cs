@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.ServiceModel;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -12,7 +13,8 @@ using ClassLibrary;
 using Newtonsoft.Json;
 using RestSharp;
 using WebServer.Models;
-using static IronPython.Modules._ast;
+using Client = WebServer.Models.Client;
+using Job = WebServer.Models.Job;
 
 namespace ClientDesktopApp
 {
@@ -88,7 +90,7 @@ namespace ClientDesktopApp
                                 this.SetProgressBarVisible();
                                 JobLock.isLocked = true;
                                 // Completing the job and getting result
-                                string result = jobServer.CompleteJob(job.PythonCode);
+                                string result = jobServer.CompleteJob(Decode(job.PythonCode)); // Decoding
                                 // Updating the job and client
                                 completedJobs++;
                                 Client updatedClient = new Client
@@ -102,9 +104,11 @@ namespace ClientDesktopApp
                                 // Update GUI
                                 this.UpdateResult(result);
                                 this.UpdateJobsCompleted();
+                                List<Job> newJobs = jobServer.GetJobs();                              
                                 JobLock.isLocked = false;
                                 Thread.Sleep(2000);
                                 this.SetProgressBarHidden();
+                                this.UpdateAvailableJobs(newJobs);
 
                                 break;
                             }
@@ -165,7 +169,7 @@ namespace ClientDesktopApp
             {
                 Id = new Random().Next(),
                 ClientId = clientId,
-                PythonCode = PythonCodeTextBox.Text
+                PythonCode = Encode(PythonCodeTextBox.Text)
             };
 
             RestClient client = new RestClient(localHost);
@@ -186,8 +190,56 @@ namespace ClientDesktopApp
                 dc.RunCommand();
             }
         }
+        private string Encode(string data) // Base 64 Encoding
+        {
+            if (String.IsNullOrEmpty(data))
+            {
+                return data;
+            }
 
-        private void UpdateAvailableJobs(List<Job> jobs)
+            byte[] textBytes = Encoding.UTF8.GetBytes(data);
+
+            return Convert.ToBase64String(textBytes);
+        }
+
+        private string Decode(string base64Data) // Base 64 Decoding
+        {
+            if (String.IsNullOrEmpty(base64Data))
+            {
+                return base64Data;
+            }
+
+            byte[] encodedBytes = Convert.FromBase64String(base64Data);
+
+            return Encoding.UTF8.GetString(encodedBytes);
+        }
+
+        protected override void OnClosed(EventArgs e) // Upon close delete client from db
+        {
+            base.OnClosed(e);
+            DeregisterClient();
+        }
+
+        private void DeregisterClient()
+        {
+            RestClient restClient = new RestClient(localHost);
+            RestRequest restRequest = new RestRequest("api/Clients/{id}", Method.Delete);
+            restRequest.AddUrlSegment("id", clientId);
+            RestResponse restResponse = restClient.Execute(restRequest);
+
+            Client client = JsonConvert.DeserializeObject<Client>(restResponse.Content);
+
+            if (client != null)
+            {
+                //no error
+            }
+            else
+            {
+                //error
+            }
+        }
+
+        private void UpdateAvailableJobs(List<Job> jobs) // Updates ListBox GUI from another thread
         {
             Dispatcher.Invoke(() =>
             {
@@ -197,13 +249,13 @@ namespace ClientDesktopApp
                 {
                     if (job.ClientId != clientId)
                     {
-                        JobListBox.Items.Add(job.PythonCode);
+                        JobListBox.Items.Add(Decode(job.PythonCode));
                     }
                 }
             });
         }
 
-        private void UpdateResult(string result)
+        private void UpdateResult(string result) // Updates last job result on GUI from another thread
         {
             Dispatcher.Invoke(() =>
             {
@@ -211,7 +263,7 @@ namespace ClientDesktopApp
             });
         }
 
-        private void UpdateJobsCompleted()
+        private void UpdateJobsCompleted() // Updates number of jobs completed on GUI from another thread
         {
             Dispatcher.Invoke(() =>
             {
@@ -219,7 +271,7 @@ namespace ClientDesktopApp
             });
         }
 
-        private void SetProgressBarVisible()
+        private void SetProgressBarVisible() // Sets progress bar visible from another thread
         {
             Dispatcher.Invoke(() =>
             {
@@ -227,7 +279,7 @@ namespace ClientDesktopApp
             });          
         }
 
-        private void SetProgressBarHidden()
+        private void SetProgressBarHidden() // Sets progress bar invisible from another thread
         {
             Dispatcher.Invoke(() =>
             {

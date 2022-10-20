@@ -1,0 +1,31 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    @using ClassLibrary;
+    @model IEnumerable<Client>;
+}
+
+<div id="clientsDIV">
+    <h2 style="text-align:center;">Connected Clients</h2>
+    <p style="text-align:center;">id | ip address | port | jobs completed</p>
+    <div id="clientstable">
+        <table style="margin-left:auto; margin-right:auto;">
+            @foreach (var client in Model)
+            {
+                <tr>
+                    <td>@client.Id</td>
+                    <td>| @client.IPAddress</td>
+                    <td>| @client.Port</td>
+                    <td>| @client.JobsFinished</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+<script>
+    window.setTimeout(function () {
+        window.location.reload();
+    }, 5000);
+</script>
