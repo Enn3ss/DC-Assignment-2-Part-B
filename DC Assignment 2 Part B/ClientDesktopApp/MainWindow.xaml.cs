@@ -15,6 +15,7 @@ using RestSharp;
 using WebServer.Models;
 using Client = WebServer.Models.Client;
 using Job = WebServer.Models.Job;
+using System.Security.Cryptography;
 
 namespace ClientDesktopApp
 {
